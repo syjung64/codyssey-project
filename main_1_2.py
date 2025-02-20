@@ -21,8 +21,20 @@ def lst_to_dict(log_entry) :
 
 def save_to_json(log_dict, filename) :
 
+    """
     with open(filename, "w", encoding="utf-8") as json_file:
         json.dump(log_dict, json_file, indent=4)
+    """
+
+    with open(filename, "w", encoding="utf-8") as json_file:
+        json_file.write("{\n")
+        items = list(log_dict.items())
+        for i, (key, value) in enumerate(items):
+            json_file.write(f'    "{key}": {{\n')
+            json_file.write(f'        "event": "{value["event"]}",\n')
+            json_file.write(f'        "message": "{value["message"]}"\n')
+            json_file.write("    }" + ("," if i < len(items) - 1 else "") + "\n")
+        json_file.write("}\n")
 
 log_filename = "mission_computer_main.log"
 json_filename = "mission_computer_main.json"
