@@ -22,14 +22,17 @@ env_values = {
     "mars_base_internal_oxygen": [(0.02, 0.13), 0.02]
 }
 
+def printenv(env) :
+    for key in env.keys():
+        print(f"{key}: {env[key][1]:.2f}, 허용용범위 ({env[key][0][0]}~{env[key][0][1]})")
+
 # DummySensor 객체 생성
 ds = DummySensor(env_values)
 
 # 환경 변수 값 읽어오기기
 print(f'변수갑 읽어오기')
 env = ds.get_env()
-for key in env.keys():
-    print(f"{key}: {env[key][1]}")
+printenv(env)
 
 # 환경 변수 값 설정(random)
 print(f'변수갑 설정(random)')
@@ -38,5 +41,4 @@ ds.set_env()
 # 환경 변수 값 읽어오기기
 print(f'변수갑 읽어오기')
 env = ds.get_env()
-for key in env.keys():
-    print(f"{key}: {env[key][1]:.2f}, 허용용범위 ({env[key][0][0]}~{env[key][0][1]})")
+printenv(env)
