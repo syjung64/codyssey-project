@@ -3,6 +3,16 @@ from datetime import datetime
 
 log_file = 'env.log'
 
+# 환경 변수 범위 설정
+env_values = {
+    "mars_base_internal_temperature": [(18, 30.5), 18, '도'],
+    "mars_base_external_temperature": [(0, 21), 0, '도'],
+    "mars_base_internal_humidity": [(50, 60), 50, '%'],
+    "mars_base_external_illuminance": [(500, 715), 500, 'W/m2'],
+    "mars_base_internal_co2": [(0.02, 0.1), 0.02, '%'],
+    "mars_base_internal_oxygen": [(4, 7), 4, '%']
+}
+
 class Clock:
     year, month, day = 2025, 3, 27
     hour, minute, second = 0, 0, 0
@@ -10,7 +20,7 @@ class Clock:
     base_seconds = hour * 3600 + minute * 60 + second
 
     def __init__(self, loop_per_second=10000) :
-        self.loop_count = 72000000
+        self.loop_count = 0
         self.loop_per_second = loop_per_second
 
     # 월별 일 수 정의 (윤년이 아닐 경우)
@@ -89,16 +99,6 @@ class DummySensor:
         with open(log_file, 'a') as log :
             values = list(map(lambda x: str(f'{x[1]:.2f}'), self.__env_values.values()))
             log.write(f'{current_time} | ' + ' | '.join(values) + '\n')
-
-# 환경 변수 범위 설정
-env_values = {
-    "mars_base_internal_temperature": [(18, 30.5), 18, '도'],
-    "mars_base_external_temperature": [(0, 21), 0, '도'],
-    "mars_base_internal_humidity": [(50, 60), 50, '%'],
-    "mars_base_external_illuminance": [(500, 715), 500, 'W/m2'],
-    "mars_base_internal_co2": [(0.02, 0.1), 0.02, '%'],
-    "mars_base_internal_oxygen": [(4, 7), 4, '%']
-}
 
 c = Clock()
 ds = DummySensor(env_values)     # DummySensor 객체 생성
