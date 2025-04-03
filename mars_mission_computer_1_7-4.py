@@ -15,7 +15,6 @@ env_values = {
 }
 
 class MissionComputer:
-
     def __init__(self, env_values):
         self.env_values = env_values
         self.stop_flag = False
@@ -24,7 +23,7 @@ class MissionComputer:
         while True:
             key = input()
             if key == 'q':
-                print('졸료 키 q 눌림')
+                print('System Stoped....')
                 self.stop_flag = True
                 break
         
@@ -41,6 +40,7 @@ class MissionComputer:
             ds.set_env()
             self.env_values = ds.get_env()
 
+            # 환경 변수 출력 (json)
             json_str = '{\n'
             for key in self.env_values.keys():
                 json_str += f'\t"{key}": {self.env_values[key][1]:.2f},\n'
@@ -54,6 +54,7 @@ class MissionComputer:
 
             if ave_values_sec <= 0:      
                 print(f'\n{ave_interval_min} 분 평균 값 출력----')
+                # 환경 변수 평균 값 출력 (json)
                 json_str = '{\n'
                 for key in self.env_values.keys():
                     json_str += f'\t"{key}": {self.env_values[key][2]/loop:.2f},\n'
@@ -62,7 +63,7 @@ class MissionComputer:
                 print(json_str)
                 
                 ave_values_sec = ave_interval_min * 60
-                
+
 class DummySensor:
     def __init__(self, env_values):
         self.env_values = env_values
