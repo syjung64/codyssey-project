@@ -35,7 +35,9 @@ class MissionComputer:
         ave_values_sec = ave_interval_min * 60
         loop = ave_values_sec // interval
         while not self.stop_flag:
-            print("\n환경 변수 업데이트:")
+            time.sleep(interval)
+
+            print(f'\n환경 변수 출력 (주기 - {interval} 초):')
             ds.set_env()
             self.env_values = ds.get_env()
 
@@ -44,20 +46,23 @@ class MissionComputer:
                 json_str += f'\t"{key}": {self.env_values[key][1]:.2f},\n'
             json_str = json_str.rstrip(',\n') + '\n}'
             print(json_str)
-                        
+            
             if ave_values_sec > 0 :
-                ave_values_sec = ave_values_sec - interval
-
                 for key in self.env_values.keys():
                     self.env_values[key][2] += self.env_values[key][1]
-            else :
+                ave_values_sec = ave_values_sec - interval
+
+            if ave_values_sec <= 0:      
+                print(f'\n{ave_interval_min} 분 평균 값 출력----')
+                json_str = '{\n'
                 for key in self.env_values.keys():
-                    print(f"{ave_interval_min} 분 평균 - {key}: {(self.env_values[key][2]/loop):.2f})")
+                    json_str += f'\t"{key}": {self.env_values[key][2]/loop:.2f},\n'
                     self.env_values[key][2] = 0
+                json_str = json_str.rstrip(',\n') + '\n}'
+                print(json_str)
+                
                 ave_values_sec = ave_interval_min * 60
-
-            time.sleep(interval)
-
+                
 class DummySensor:
     def __init__(self, env_values):
         self.env_values = env_values
@@ -93,4 +98,4 @@ ds = DummySensor(env_values)
 RunComputer = MissionComputer(env_values)
 
 #ds.set_env()
-RunComputer.get_sensor_data(ds, interval=20)
+RunComputer.get_sensor_data(ds, interval=20, ave_interval_min = 1)
