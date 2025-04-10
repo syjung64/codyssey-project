@@ -2,64 +2,62 @@
 # 더미 센서 시스템
 # 2025-03-23
 
-import random
+class TEST:
+    C_1 = 'class var'
 
-#with open('current_time.txt') as f:
-    #CURRENT_TIME = f.read().strip()
+    @classmethod
+    def class_sensor(cls):
+        aa = cls.C_1
+        print('--', aa)
+    
+        return aa
 
-CURRENT_TIME = '2025-12-12-00-00-00'
+    @staticmethod
+    def static_sensor():
+        aa = 20
+        print('**', aa)
+        return aa
+    
+    def instance_func(self):
+        aa = 50
+        print('$$$', aa)
+        return aa
+    
+    def normal_func():
+        aa = 50
+        print('@@@', aa)
+        return aa
 
-class DummySensor:
-    ENV_VALUE_CONFIG = {
-        'mars_base_internal_temperature': (18, 30, 'int'),
-        'mars_base_external_temperature': (0, 21, 'int'),
-        'mars_base_internal_humidity': (50, 60, 'int'),
-        'mars_base_internal_co2': (0.02, 0.1, 'float'),
-        'mars_base_internal_oxygen': (4, 7, 'int'),
-    }
+    def get_ins(self):
+        self.aa = 99
+        print('##', self.aa)
 
-    LOG_FILENAME = 'sensor.log'
-    DELIMITER = ', '
+        ## method가 인스턴스, 클래스에 링크되어 있는가
+        ## static 메소드는 어디에도 링크 안됨
 
-    def __init__(self):
-        self.env_values = {key: 0 for key in self.ENV_VALUE_CONFIG.keys()}
+        # staticmethod / not link, 인스턴스-클래스로 호출 가능
+        self.static_sensor()
+        TEST.static_sensor()
 
-    def _file_exists(self, path):
-        try:
-            with open(path, "r"):
-                return True
-        except FileNotFoundError:
-            return False
+        # instance method / instance(self) link, 인스턴스로 호출 가능능
+        self.instance_func()
 
-    def _log_env(self):
-        file_needs_header = not self._file_exists(self.LOG_FILENAME)
+        # normal method / not link, 클래스로 호출 가능
+        TEST.normal_func()
 
-        log_values = [CURRENT_TIME] + [
-            str(self.env_values[key]) for key in self.env_values
-        ]
-        log_line = self.DELIMITER.join(log_values) + '\n'
+        # classmethod / class link, 인스턴스-클래스로 호출 가능
+        self.class_sensor()
+        TEST.class_sensor()
 
-        with open(self.LOG_FILENAME, 'a') as log_file:
-            if file_needs_header:
-                header_keys = ['datetime'] + list(self.env_values.keys())
-                header_line = self.DELIMITER.join(header_keys) + "\n"
-                log_file.write(header_line)
+        return self.aa
 
-            log_file.write(log_line)
+print('classmethod - ', TEST.class_sensor())
+print('staticmethod - ', TEST.static_sensor())
+print('normal function - ', TEST.normal_func())
 
-    def set_env(self):
-        for key, (start, end, value_type) in self.ENV_VALUE_CONFIG.items():
-            if value_type == 'int':
-                self.env_values[key] = random.randint(start, end)
-            elif value_type == 'float':
-                self.env_values[key] = round(random.uniform(start, end), 2)
+t = TEST()
+t.get_ins()
 
-    def get_env(self):
-        self._log_env()
-        return self.env_values
-
-
-if __name__ == '__main__':
-    ds = DummySensor()
-    ds.set_env()
-    ds.get_env()
+print('classmethod - ', t.class_sensor())
+print('staticmethod - ', t.static_sensor())
+# 오류 - print('normal function - ', t.normal_func())

@@ -1,0 +1,2 @@
+datetime, mars_base_internal_temperature, mars_base_external_temperature, mars_base_internal_humidity, mars_base_internal_co2, mars_base_internal_oxygen
+2025-12-12-00-00-00, 30, 13, 60, 0.03, 5
