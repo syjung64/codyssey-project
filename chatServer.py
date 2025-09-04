@@ -36,8 +36,11 @@ def handle_client(client_socket, addr):
             message = client_socket.recv(1024)
             if not message:
                 break
-            print(f"[{nickname}] {message.decode()}")
-            broadcast(f"{nickname}: {message.decode()}".encode(), client_socket)
+            decoded_msg = message.decode()
+            if decoded_msg.strip().lower() == 'quit':  # quit 메시지 처리
+                break
+            print(f"[{nickname}] {decoded_msg}")
+            broadcast(f"{nickname}: {decoded_msg}".encode(), client_socket)
         except:
             break
     print(f"[종료] {addr} ({nickname}) 연결 종료.")

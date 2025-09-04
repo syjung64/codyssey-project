@@ -41,7 +41,8 @@ def main():
     while True:
         try:
             msg = input()
-            if msg.lower() == '/quit':
+            if msg.lower() == 'quit':  # quit 입력 시 서버에 quit 전송 후 종료
+                sock.sendall(msg.encode())
                 print("채팅을 종료합니다.")
                 break
             sock.sendall(msg.encode())
