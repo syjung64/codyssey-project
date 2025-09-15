@@ -2,13 +2,49 @@ import socket
 import threading
 import os
 import datetime
+import json
+from urllib.request import urlopen
+from urllib.error import URLError, HTTPError
 
 HOST = '0.0.0.0'
 PORT = 9090
 
+
+def fetch_geo_info(ip_address):
+    """접속 IP 기반 위치 정보를 조회한다. 실패 시 최소 정보만 반환."""
+    # 무료 API: ip-api.com (비상업/제한적 용도)
+    api_url = (
+        f"http://ip-api.com/json/{ip_address}?lang=ko&fields="
+        "status,message,country,regionName,city,zip,lat,lon,timezone,isp,org,as,query"
+    )
+    try:
+        with urlopen(api_url, timeout=3) as resp:
+            data = resp.read().decode("utf-8", errors="ignore")
+            result = json.loads(data)
+            if result.get("status") == "success":
+                return {
+                    "ip": result.get("query"),
+                    "country": result.get("country"),
+                    "region": result.get("regionName"),
+                    "city": result.get("city"),
+                    "zip": result.get("zip"),
+                    "lat": result.get("lat"),
+                    "lon": result.get("lon"),
+                    "timezone": result.get("timezone"),
+                    "isp": result.get("isp"),
+                    "org": result.get("org"),
+                    "as": result.get("as"),
+                }
+            else:
+                return {"ip": ip_address, "error": result.get("message", "lookup_failed")}
+    except (URLError, HTTPError, TimeoutError, ValueError):
+        return {"ip": ip_address, "error": "lookup_error"}
+
 def handle_client(conn, addr):
     try:
         request = conn.recv(1024).decode()
+        print(request)
+        
         if not request:
             conn.close()
             return
@@ -23,6 +59,22 @@ def handle_client(conn, addr):
             response = "HTTP/1.1 405 Method Not Allowed\r\n\r\nMethod Not Allowed"
             conn.sendall(response.encode())
             conn.close()
+            return
+
+        client_ip = addr[0]
+
+        # 위치 정보 제공 엔드포인트
+        if path == "/location":
+            geo = fetch_geo_info(client_ip)
+            body = json.dumps(geo, ensure_ascii=False, indent=2).encode('utf-8')
+            header = (
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: application/json; charset=utf-8\r\n"
+                f"Content-Length: {len(body)}\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+            )
+            conn.sendall(header.encode('utf-8') + body)
             return
 
         # "/" 또는 "/index.html" 요청만 처리
@@ -80,7 +132,14 @@ def main():
             conn, addr = server_socket.accept()
             # 접속 시간과 IP 주소 출력
             connect_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"[접속] {addr[0]}에서 {connect_time}에 접속함.")
+            client_ip = addr[0]
+            # 위치 요약 정보 조회 (로그용, 실패해도 서버 동작에는 영향 없음)
+            geo = fetch_geo_info(client_ip)
+            location_text = (
+                f"{geo.get('country','?')} {geo.get('region','?')} {geo.get('city','?')}"
+                if 'error' not in geo else "위치 조회 실패"
+            )
+            print(f"[접속] {client_ip}에서 {connect_time}에 접속함. 위치: {location_text}")
             thread = threading.Thread(target=handle_client, args=(conn, addr))
             thread.daemon = True
             thread.start()
